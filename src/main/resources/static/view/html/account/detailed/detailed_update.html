@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="renderer" content="webkit">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0">
+	<link rel="stylesheet" href="../../../lib/layuiadmin/layui/css/layui.css">
+	<link rel="stylesheet" href="../../../css/common.css">
+	<title></title>
+</head>
+<body>
+<div class="layui-fluid">
+	<div class="row-crad">
+		<form id="fm" class="layui-form layui-form-pane">
+			<div class="layui-row layui-col-space15">
+				<div class="layui-col-md12">
+					<label class="layui-form-label">名称</label>
+					<div class="layui-input-block">
+						<input type="hidden" name="billId" id="billId">
+						<input name="name" class="layui-input" placeholder="请输入" autocomplete="off" lay-verify="required|maxLen" maxLen="50">
+					</div>
+				</div>
+			</div>
+			<div class="layui-row layui-col-space15">
+				<div class="layui-col-md12">
+					<label class="layui-form-label">交易类型</label>
+					<div class="layui-input-block">
+						<div id="type"></div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-row layui-col-space15">
+				<div class="layui-col-md12">
+					<label class="layui-form-label">金额</label>
+					<div class="layui-input-block">
+						<input name="money" class="layui-input" placeholder="请输入" autocomplete="off" lay-verify="required|maxLen" maxLen="50">
+					</div>
+				</div>
+			</div>
+			<div class="layui-row layui-col-space15">
+				<div class="layui-col-md12">
+					<label class="layui-form-label">交易时间</label>
+					<div class="layui-input-block">
+						<input name="time" class="layui-input" placeholder="请选择" readonly="readonly">
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-row layui-col-space15">
+				<div class="layui-col-md12">
+					<label class="layui-form-label">交易备注</label>
+					<div class="layui-input-block">
+						<input name="remarks" class="layui-input" placeholder="请输入" autocomplete="off">
+					</div>
+				</div>
+			</div>
+			<div class="layui-layout-admin">
+				<div class="layui-input-block">
+					<div class="layui-footer">
+						<button type="button" class="layui-btn layui-btn-sm" lay-submit lay-filter="apply">确定</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<script src="../../../lib/layuiadmin/layui/layui.js"></script>
+<script src="../../../lib/jquery/jquery.js"></script>
+<script src="../../../js/config.js"></script>
+<script>
+	layui.config({
+		base : '../../../lib/layuiadmin/'
+	}).extend({
+		xmSelect: 'lib/extend/xm-select',
+		common : 'js/common',
+		shiro : 'js/shiro',
+	}).use(['xmSelect', 'laydate', 'common', 'shiro' ], function() {
+		layui.$.form.load('fm', layui.$.http.getJSON('/api/ac/detailed/get/' + layui.$.http.param('id')));
+		//$("#billId").val(layui.$.http.param('billId'));
+		layui.laydate.render({
+			elem : 'input[name="time"]',
+			value : new Date(),
+			trigger: 'click'//呼出事件改成click
+		});
+		layui.xmSelect.render({
+			el: '#type',
+			name: 'type',
+			radio: true,
+			clickClose: true,
+			layVerify: 'required',
+			model: {
+				label: {
+					type: 'text'
+				}
+			},
+			prop: {
+				value: 'id',
+				name: 'text'
+			},
+			initValue: ['0'],
+			data:[{id:"0",text:"支出类型"},
+				{id:"1",text:"收入类型"}]
+		});
+		layui.form.on('submit(apply)', function(data) {
+			layui.$.http.post({
+				url : '/api/ac/detailed/update',
+				data : layui.$.form.val('fm'),
+				success : function(data) {
+					layui.$.gui.handle(data, function() {
+						parent.layui.$('button[lay-submit]').click();
+						layui.$.gui.close();
+					});
+				}
+			});
+			return false;
+		});
+	});
+</script>
+</body>
+</html>
